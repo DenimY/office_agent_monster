@@ -153,8 +153,18 @@ body {
   width: 100%;
   height: auto;
   image-rendering: pixelated;
-  cursor: crosshair;
+  /* 32px pixel open-hand — crosshair felt harsh on the cave map */
+  cursor: url("/cursors/hand-open.png") 16 20, grab;
   background: #0a1218;
+}
+
+#game.is-over-monster {
+  cursor: url("/cursors/hand-point.png") 12 2, pointer;
+}
+
+body.is-dragging,
+body.is-dragging * {
+  cursor: url("/cursors/hand-grab.png") 16 16, grabbing !important;
 }
 
 .inspect {
@@ -297,6 +307,11 @@ body {
   color: var(--text);
   font: inherit;
   padding: 0.4rem 0.5rem;
+  cursor: text;
+}
+
+.field select {
+  cursor: pointer;
 }
 
 .terminal {
@@ -450,11 +465,15 @@ body {
   padding: 0.45rem 0.5rem;
   background: #101820;
   border: 1px solid #2a3a42;
-  cursor: grab;
+  cursor: url("/cursors/hand-open.png") 16 20, grab;
   text-align: left;
   color: inherit;
   font: inherit;
   width: 100%;
+}
+
+.roster-item:active {
+  cursor: url("/cursors/hand-grab.png") 16 16, grabbing;
 }
 
 .roster-item.selected {

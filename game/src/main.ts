@@ -215,6 +215,13 @@ function renderRoster(): void {
     btn.addEventListener("dragstart", (ev) => {
       ev.dataTransfer?.setData("text/oam-monster", m.id);
       ev.dataTransfer?.setData("text/plain", m.id);
+      document.body.classList.add("is-dragging");
+    });
+    btn.addEventListener("dragend", () => {
+      document.body.classList.remove("is-dragging");
+      document
+        .querySelectorAll(".team-drop.drag-over")
+        .forEach((el) => el.classList.remove("drag-over"));
     });
     li.append(btn);
     rosterList.append(li);
@@ -397,23 +404,41 @@ optRoleReset.addEventListener("click", () => {
   renderOptionsRoles();
 });
 
-canvas.addEventListener("click", (ev) => {
+function canvasWorldPos(ev: MouseEvent): { wx: number; wy: number } {
   const rect = canvas.getBoundingClientRect();
   const sx = canvas.width / rect.width;
   const sy = canvas.height / rect.height;
-  const wx = (ev.clientX - rect.left) * sx;
-  const wy = (ev.clientY - rect.top) * sy;
+  return {
+    wx: (ev.clientX - rect.left) * sx,
+    wy: (ev.clientY - rect.top) * sy,
+  };
+}
 
+function monsterAt(wx: number, wy: number): Monster | null {
   const hits = monsters
     .map((m, i) => ({ m, i }))
     .filter(({ m }) => hitTestMonster(m, wx, wy))
     .sort((a, b) => b.m.y - a.m.y || b.i - a.i);
+  return hits[0]?.m ?? null;
+}
 
-  if (hits.length === 0) {
+canvas.addEventListener("pointermove", (ev) => {
+  const { wx, wy } = canvasWorldPos(ev);
+  canvas.classList.toggle("is-over-monster", monsterAt(wx, wy) !== null);
+});
+
+canvas.addEventListener("pointerleave", () => {
+  canvas.classList.remove("is-over-monster");
+});
+
+canvas.addEventListener("click", (ev) => {
+  const { wx, wy } = canvasWorldPos(ev);
+  const hit = monsterAt(wx, wy);
+  if (!hit) {
     closeInspect();
     return;
   }
-  selectMonster(hits[0]!.m);
+  selectMonster(hit);
 });
 
 function tick(now: number): void {
