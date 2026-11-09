@@ -13,37 +13,161 @@
           <span class="brand-mark" aria-hidden="true"></span>
           <h1>office_agent_monster</h1>
         </div>
-        <p class="tagline" data-i18n="tagline">동굴 속 픽셀 오피스 — 몬스터를 클릭하세요</p>
+        <p class="tagline" data-i18n="tagline">동굴 속 픽셀 오피스 — 클릭·명령·팀 배정</p>
         <div class="chrome-actions">
+          <button type="button" id="options-btn" class="lang-btn ghost" data-i18n="optionsBtn">옵션</button>
           <button type="button" id="lang-toggle" class="lang-btn" aria-label="Language">KO / EN</button>
         </div>
       </header>
 
-      <main class="stage">
-        <canvas id="game" width="960" height="640" aria-label="Cave office map"></canvas>
-        <aside id="inspect" class="inspect" hidden>
-          <button type="button" id="inspect-close" class="inspect-close" aria-label="Close">×</button>
-          <div class="inspect-code" id="inspect-code"></div>
-          <h2 id="inspect-name"></h2>
-          <dl>
-            <div>
-              <dt data-i18n="role">역할</dt>
-              <dd id="inspect-role"></dd>
-            </div>
-            <div>
-              <dt data-i18n="task">현재 작업</dt>
-              <dd id="inspect-task"></dd>
-            </div>
-            <div>
-              <dt data-i18n="status">상태</dt>
-              <dd id="inspect-status"></dd>
-            </div>
-          </dl>
-        </aside>
-      </main>
+      <div class="layout">
+        <div class="main-col">
+          <main class="stage">
+            <canvas id="game" width="960" height="640" aria-label="Cave office map"></canvas>
+            <aside id="inspect" class="inspect" hidden>
+              <button type="button" id="inspect-close" class="inspect-close" aria-label="Close">×</button>
+              <div class="inspect-code" id="inspect-code"></div>
+              <h2 id="inspect-name"></h2>
+              <dl>
+                <div>
+                  <dt data-i18n="title">직책</dt>
+                  <dd id="inspect-title"></dd>
+                </div>
+                <div>
+                  <dt data-i18n="role">현재 역할</dt>
+                  <dd id="inspect-role" class="role-editable" title="Double-click to change"></dd>
+                  <p class="field-hint" data-i18n="roleHint">더블클릭으로 역할 변경</p>
+                </div>
+                <div>
+                  <dt data-i18n="team">팀</dt>
+                  <dd id="inspect-team"></dd>
+                </div>
+                <div>
+                  <div class="task-row">
+                    <dt data-i18n="task">현재 작업</dt>
+                    <button type="button" id="task-detail-btn" class="mini-btn" data-i18n="taskDetailBtn">자세히 보기</button>
+                  </div>
+                  <dd id="inspect-task"></dd>
+                </div>
+                <div>
+                  <dt data-i18n="status">상태</dt>
+                  <dd id="inspect-status"></dd>
+                </div>
+              </dl>
 
-      <footer class="hint" data-i18n="hint">클릭: 몬스터 선택 · 몬스터는 책상 사이를 돌아다닙니다</footer>
+              <section class="cmd-section">
+                <h3 data-i18n="commands">명령</h3>
+                <div class="cmd-grid" id="cmd-buttons">
+                  <button type="button" data-cmd="desk" data-i18n="cmdDesk">책상으로</button>
+                  <button type="button" data-cmd="wander" data-i18n="cmdWander">배회</button>
+                  <button type="button" data-cmd="work" data-i18n="cmdWork">작업 시작</button>
+                  <button type="button" data-cmd="break" data-i18n="cmdBreak">휴식</button>
+                  <button type="button" data-cmd="status" data-i18n="cmdStatus">상태 보고</button>
+                  <button type="button" data-cmd="cancel" data-i18n="cmdCancel">선택 해제</button>
+                </div>
+                <label class="cmd-inline">
+                  <span data-i18n="cmdInput">명령하기</span>
+                  <span class="cmd-inline-row">
+                    <input id="inspect-cmd-input" type="text" autocomplete="off" data-i18n-placeholder="cmdPlaceholder" placeholder="예: work / desk / status" />
+                    <button type="button" id="inspect-cmd-send" class="mini-btn" data-i18n="cmdSend">실행</button>
+                  </span>
+                </label>
+              </section>
+            </aside>
+          </main>
+
+          <section class="terminal" aria-label="Terminal">
+            <div class="terminal-head">
+              <strong data-i18n="terminalTitle">터미널</strong>
+              <span class="terminal-hint" data-i18n="terminalHint">help · clear · spawn · select</span>
+            </div>
+            <div id="terminal-log" class="terminal-log" role="log" aria-live="polite"></div>
+            <form id="terminal-form" class="terminal-form">
+              <span class="prompt" data-i18n="terminalPrompt">oam></span>
+              <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" />
+            </form>
+          </section>
+        </div>
+
+        <aside class="sidebar" aria-label="Sidebar">
+          <h2 data-i18n="sidebarTitle">오피스 사이드바</h2>
+
+          <section class="side-block">
+            <h3 data-i18n="addMonster">몬스터 추가</h3>
+            <label class="field">
+              <span data-i18n="spawnSprite">스프라이트</span>
+              <select id="spawn-species">
+                <option value="dino" data-i18n="spawnDino">공룡</option>
+                <option value="ghost" data-i18n="spawnGhost">유령</option>
+                <option value="slime" data-i18n="spawnSlime">슬라임</option>
+              </select>
+            </label>
+            <label class="field">
+              <span data-i18n="spawnRole">역할 선택</span>
+              <select id="spawn-role"></select>
+            </label>
+            <button type="button" id="spawn-btn" class="primary-btn" data-i18n="spawnBtn">추가</button>
+          </section>
+
+          <section class="side-block">
+            <h3 data-i18n="teams">팀 블록</h3>
+            <p class="side-hint" data-i18n="teamsHint">로스터 행을 팀 블록으로 드래그하세요</p>
+            <div class="team-blocks">
+              <div class="team-drop" data-team="dev" data-i18n="teamDev">Dev</div>
+              <div class="team-drop" data-team="design" data-i18n="teamDesign">Design</div>
+              <div class="team-drop" data-team="lead" data-i18n="teamLead">Lead</div>
+            </div>
+          </section>
+
+          <section class="side-block roster-block">
+            <h3 data-i18n="roster">실시간 로스터</h3>
+            <ul id="roster-list" class="roster-list"></ul>
+          </section>
+        </aside>
+      </div>
+
+      <footer class="hint" data-i18n="hint">클릭 선택 · 로스터→팀 드래그 · 터미널/명령 · 머리 …/!</footer>
     </div>
+
+    <dialog id="task-detail-dialog" class="modal">
+      <form method="dialog" class="modal-inner">
+        <h3 data-i18n="taskDetailTitle">작업 상세</h3>
+        <p id="task-detail-body" class="modal-body"></p>
+        <button value="close" data-i18n="taskDetailClose">닫기</button>
+      </form>
+    </dialog>
+
+    <dialog id="role-pick-dialog" class="modal">
+      <form method="dialog" class="modal-inner" id="role-pick-form">
+        <h3 data-i18n="pickRoleTitle">역할 선택</h3>
+        <div id="role-pick-list" class="role-pick-list"></div>
+        <button value="cancel" data-i18n="optionsClose">닫기</button>
+      </form>
+    </dialog>
+
+    <dialog id="options-dialog" class="modal">
+      <div class="modal-inner options-inner">
+        <h3 data-i18n="optionsTitle">역할 옵션</h3>
+        <p class="side-hint" data-i18n="optionsIntro">기본 역할 목록을 추가·삭제할 수 있습니다. (localStorage)</p>
+        <ul id="options-role-list" class="options-role-list"></ul>
+        <div class="options-add">
+          <label>
+            <span data-i18n="optionsKo">한국어</span>
+            <input id="opt-role-ko" type="text" />
+          </label>
+          <label>
+            <span data-i18n="optionsEn">English</span>
+            <input id="opt-role-en" type="text" />
+          </label>
+          <button type="button" id="opt-role-add" class="mini-btn" data-i18n="optionsAdd">역할 추가</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="opt-role-reset" class="ghost-btn" data-i18n="optionsReset">기본값 복원</button>
+          <button type="button" id="options-close" data-i18n="optionsClose">닫기</button>
+        </div>
+      </div>
+    </dialog>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

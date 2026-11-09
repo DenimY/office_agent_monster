@@ -6,7 +6,7 @@
 
 ## Playable prototype (v0)
 
-Cave-office browser shell — **no agents / LLM / API keys**.
+Cave-office browser shell with click/terminal commands, teams, and role options — **no agents / LLM / API keys**.
 
 ```bash
 cd game
@@ -14,4 +14,4 @@ npm install
 npm run dev
 ```
 
-Details: [`game/README.md`](game/README.md).
+Default: `http://localhost:5188`. Details: [`game/README.md`](game/README.md).
