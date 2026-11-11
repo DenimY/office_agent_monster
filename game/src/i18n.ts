@@ -71,6 +71,25 @@ export const uiCopy = {
   optionsReset: { ko: "기본값 복원", en: "Reset defaults" },
   optionsClose: { ko: "닫기", en: "Close" },
   pickRoleTitle: { ko: "역할 선택", en: "Choose role" },
+  projects: { ko: "프로젝트", en: "Projects" },
+  projectsHint: {
+    ko: "한눈에 워크스트림 · 클릭하면 상세",
+    en: "Workstreams at a glance · click for detail",
+  },
+  projectDetailTitle: { ko: "프로젝트 상세", en: "Project detail" },
+  projectStatus: { ko: "상태", en: "Status" },
+  projectProgress: { ko: "진행", en: "Progress" },
+  projectTeam: { ko: "팀", en: "Team" },
+  projectAssignees: { ko: "담당 몬스터", en: "Assignees" },
+  projectLogs: { ko: "최근 로그", en: "Recent log" },
+  projectArtifacts: { ko: "아티팩트", en: "Artifacts" },
+  projectLeadNote: { ko: "Lead 메모", en: "Lead note" },
+  projectMockBadge: { ko: "목 데이터", en: "Mock data" },
+  projectSelectAssignee: { ko: "맵에서 선택", en: "Select on map" },
+  projectNoAssignee: { ko: "배정된 몬스터 없음", en: "No assigned monsters" },
+  toastOk: { ko: "완료", en: "Done" },
+  toastErr: { ko: "실패", en: "Failed" },
+  dropHere: { ko: "여기에 놓기", en: "Drop here" },
 } as const;
 
 export type UiKey = keyof typeof uiCopy;

@@ -425,13 +425,19 @@ export function drawMonster(
   ctx.scale(m.facing * s, s);
 
   if (selected) {
-    ctx.fillStyle = "rgba(79, 208, 199, 0.28)";
-    ctx.fillRect(-16, 5, 32, 8);
+    const pulse = 0.55 + Math.sin(m.frame * 5) * 0.2;
+    ctx.fillStyle = `rgba(79, 208, 199, ${0.22 + pulse * 0.12})`;
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 18, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
     ctx.strokeStyle = "#4fd0c7";
-    ctx.lineWidth = 1.2 / s;
-    ctx.strokeRect(-16, -18, 32, 30);
-    ctx.fillStyle = "rgba(79, 208, 199, 0.12)";
-    ctx.fillRect(-16, -18, 32, 30);
+    ctx.lineWidth = 1.6 / s;
+    ctx.strokeRect(-17, -19, 34, 32);
+    ctx.strokeStyle = `rgba(240, 180, 41, ${pulse})`;
+    ctx.lineWidth = 1 / s;
+    ctx.strokeRect(-19, -21, 38, 36);
+    ctx.fillStyle = "rgba(79, 208, 199, 0.1)";
+    ctx.fillRect(-17, -19, 34, 32);
   }
 
   if (m.species === "dino") drawDino(ctx, m);

@@ -110,12 +110,27 @@
           </section>
 
           <section class="side-block">
+            <h3 data-i18n="projects">프로젝트</h3>
+            <p class="side-hint" data-i18n="projectsHint">한눈에 워크스트림 · 클릭하면 상세</p>
+            <div id="projects-list" class="projects-list"></div>
+          </section>
+
+          <section class="side-block">
             <h3 data-i18n="teams">팀 블록</h3>
             <p class="side-hint" data-i18n="teamsHint">로스터 행을 팀 블록으로 드래그하세요</p>
             <div class="team-blocks">
-              <div class="team-drop" data-team="dev" data-i18n="teamDev">Dev</div>
-              <div class="team-drop" data-team="design" data-i18n="teamDesign">Design</div>
-              <div class="team-drop" data-team="lead" data-i18n="teamLead">Lead</div>
+              <div class="team-drop" data-team="dev">
+                <span class="team-drop-label" data-i18n="teamDev">Dev</span>
+                <span class="team-drop-hint" data-i18n="dropHere">여기에 놓기</span>
+              </div>
+              <div class="team-drop" data-team="design">
+                <span class="team-drop-label" data-i18n="teamDesign">Design</span>
+                <span class="team-drop-hint" data-i18n="dropHere">여기에 놓기</span>
+              </div>
+              <div class="team-drop" data-team="lead">
+                <span class="team-drop-label" data-i18n="teamLead">Lead</span>
+                <span class="team-drop-hint" data-i18n="dropHere">여기에 놓기</span>
+              </div>
             </div>
           </section>
 
@@ -127,6 +142,7 @@
       </div>
 
       <footer class="hint" data-i18n="hint">클릭 선택 · 로스터→팀 드래그 · 터미널/명령 · 머리 …/!</footer>
+      <div id="toast-host" class="toast-host" aria-live="polite" aria-atomic="true"></div>
     </div>
 
     <dialog id="task-detail-dialog" class="modal">
@@ -164,6 +180,54 @@
         <div class="modal-actions">
           <button type="button" id="opt-role-reset" class="ghost-btn" data-i18n="optionsReset">기본값 복원</button>
           <button type="button" id="options-close" data-i18n="optionsClose">닫기</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="project-detail-dialog" class="modal project-modal">
+      <div class="modal-inner">
+        <div class="project-modal-head">
+          <h3 id="project-detail-name">프로젝트 상세</h3>
+          <span class="mock-badge" data-i18n="projectMockBadge">목 데이터</span>
+        </div>
+        <p id="project-detail-summary" class="project-summary"></p>
+        <dl class="project-meta">
+          <div>
+            <dt data-i18n="projectStatus">상태</dt>
+            <dd id="project-detail-status"></dd>
+          </div>
+          <div>
+            <dt data-i18n="projectProgress">진행</dt>
+            <dd>
+              <div class="progress-track" aria-hidden="true">
+                <div id="project-detail-progress-bar" class="progress-fill"></div>
+              </div>
+              <span id="project-detail-progress"></span>
+            </dd>
+          </div>
+          <div>
+            <dt data-i18n="projectTeam">팀</dt>
+            <dd id="project-detail-team"></dd>
+          </div>
+        </dl>
+        <section class="project-section">
+          <h4 data-i18n="projectAssignees">담당 몬스터</h4>
+          <ul id="project-detail-assignees" class="project-assignees"></ul>
+        </section>
+        <section class="project-section">
+          <h4 data-i18n="projectLogs">최근 로그</h4>
+          <ul id="project-detail-logs" class="project-logs"></ul>
+        </section>
+        <section class="project-section">
+          <h4 data-i18n="projectArtifacts">아티팩트</h4>
+          <ul id="project-detail-artifacts" class="project-artifacts"></ul>
+        </section>
+        <section class="project-section">
+          <h4 data-i18n="projectLeadNote">Lead 메모</h4>
+          <p id="project-detail-lead" class="project-lead"></p>
+        </section>
+        <div class="modal-actions">
+          <button type="button" id="project-detail-close" data-i18n="optionsClose">닫기</button>
         </div>
       </div>
     </dialog>

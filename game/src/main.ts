@@ -29,6 +29,11 @@ import {
   type TeamId,
 } from "./monsters";
 import {
+  MOCK_PROJECTS,
+  statusLabel,
+  type MockProject,
+} from "./projects";
+import {
   addRoleChoice,
   loadRoleChoices,
   removeRoleChoice,
@@ -43,6 +48,7 @@ const inspectClose = document.querySelector<HTMLButtonElement>("#inspect-close")
 const langBtn = document.querySelector<HTMLButtonElement>("#lang-toggle")!;
 const optionsBtn = document.querySelector<HTMLButtonElement>("#options-btn")!;
 const rosterList = document.querySelector<HTMLUListElement>("#roster-list")!;
+const projectsList = document.querySelector<HTMLElement>("#projects-list")!;
 const spawnSpecies = document.querySelector<HTMLSelectElement>("#spawn-species")!;
 const spawnRole = document.querySelector<HTMLSelectElement>("#spawn-role")!;
 const spawnBtn = document.querySelector<HTMLButtonElement>("#spawn-btn")!;
@@ -63,6 +69,9 @@ const optRoleEn = document.querySelector<HTMLInputElement>("#opt-role-en")!;
 const optRoleAdd = document.querySelector<HTMLButtonElement>("#opt-role-add")!;
 const optRoleReset = document.querySelector<HTMLButtonElement>("#opt-role-reset")!;
 const optionsClose = document.querySelector<HTMLButtonElement>("#options-close")!;
+const toastHost = document.querySelector<HTMLElement>("#toast-host")!;
+const projectDetailDialog = document.querySelector<HTMLDialogElement>("#project-detail-dialog")!;
+const projectDetailClose = document.querySelector<HTMLButtonElement>("#project-detail-close")!;
 
 canvas.width = MAP_W;
 canvas.height = MAP_H;
@@ -88,7 +97,103 @@ function applyUiLang(): void {
   langBtn.setAttribute("aria-pressed", lang === "en" ? "true" : "false");
   fillSpawnRoleSelect();
   if (selected) fillInspect(selected);
+  renderProjects();
   rosterDirty = true;
+}
+
+function showToast(message: string, ok = true): void {
+  const el = document.createElement("div");
+  el.className = "toast" + (ok ? "" : " err");
+  el.textContent = message;
+  toastHost.append(el);
+  window.setTimeout(() => {
+    el.classList.add("out");
+    window.setTimeout(() => el.remove(), 200);
+  }, 2200);
+}
+
+function projectAssignees(project: MockProject): Monster[] {
+  const byTeam = monsters.filter((m) => m.team === project.team);
+  if (byTeam.length) return byTeam;
+  return monsters.filter((m) =>
+    project.assigneeHints.some((h) => m.code.toUpperCase().includes(h.toUpperCase())),
+  );
+}
+
+function renderProjects(): void {
+  projectsList.innerHTML = "";
+  for (const p of MOCK_PROJECTS) {
+    const count = projectAssignees(p).length;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "project-card";
+    btn.innerHTML = `
+      <span class="status-dot ${p.status}" aria-hidden="true"></span>
+      <span class="proj-main">
+        <span class="proj-name">${p.name[lang]}</span>
+        <span class="proj-meta">${statusLabel(p.status, lang)} · ${TEAM_META[p.team].label[lang]} · ${count}</span>
+      </span>
+      <span class="proj-pct">${p.progress}%</span>
+    `;
+    btn.addEventListener("click", () => openProjectDetail(p));
+    projectsList.append(btn);
+  }
+}
+
+function openProjectDetail(p: MockProject): void {
+  document.querySelector("#project-detail-name")!.textContent = p.name[lang];
+  document.querySelector("#project-detail-summary")!.textContent = p.summary[lang];
+  document.querySelector("#project-detail-status")!.textContent = statusLabel(p.status, lang);
+  document.querySelector("#project-detail-progress")!.textContent = `${p.progress}%`;
+  const bar = document.querySelector<HTMLElement>("#project-detail-progress-bar")!;
+  bar.style.width = `${p.progress}%`;
+  document.querySelector("#project-detail-team")!.textContent = TEAM_META[p.team].label[lang];
+  document.querySelector("#project-detail-lead")!.textContent = p.leadNote[lang];
+
+  const assignees = document.querySelector<HTMLUListElement>("#project-detail-assignees")!;
+  assignees.innerHTML = "";
+  const matched = projectAssignees(p);
+  if (!matched.length) {
+    const li = document.createElement("li");
+    li.className = "empty";
+    li.textContent = t("projectNoAssignee", lang);
+    assignees.append(li);
+  } else {
+    for (const m of matched) {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = `<span>${m.code} · ${m.name[lang]}</span><span class="field-hint">${t("projectSelectAssignee", lang)}</span>`;
+      b.addEventListener("click", () => {
+        projectDetailDialog.close();
+        selectMonster(m);
+        showToast(
+          lang === "ko" ? `${m.code} 선택됨` : `Selected ${m.code}`,
+          true,
+        );
+      });
+      li.append(b);
+      assignees.append(li);
+    }
+  }
+
+  const logs = document.querySelector<HTMLUListElement>("#project-detail-logs")!;
+  logs.innerHTML = "";
+  for (const line of p.logs) {
+    const li = document.createElement("li");
+    li.textContent = line[lang];
+    logs.append(li);
+  }
+
+  const arts = document.querySelector<HTMLUListElement>("#project-detail-artifacts")!;
+  arts.innerHTML = "";
+  for (const a of p.artifacts) {
+    const li = document.createElement("li");
+    li.textContent = a[lang];
+    arts.append(li);
+  }
+
+  projectDetailDialog.showModal();
 }
 
 function fillSpawnRoleSelect(): void {
@@ -143,9 +248,11 @@ function applyResult(result: CommandResult, echo?: string): void {
   if (result.message.ko === "__CLEAR_LOG__") {
     terminalLog.innerHTML = "";
     appendLog(lang === "ko" ? "(로그 지움)" : "(log cleared)");
+    showToast(lang === "ko" ? "로그 지움" : "Log cleared", true);
     return;
   }
   appendLog(result.message[lang], result.ok ? "ok" : "err");
+  showToast(result.message[lang], result.ok);
   if (result.clearSelection) {
     selected = null;
     inspect.hidden = true;
@@ -155,6 +262,7 @@ function applyResult(result: CommandResult, echo?: string): void {
   const sit = formatSituation(makeCtx());
   appendLog(sit[lang], "sit");
   rosterDirty = true;
+  renderProjects();
 }
 
 function runCommandLine(raw: string): void {
@@ -351,12 +459,14 @@ spawnBtn.addEventListener("click", () => {
   const m = spawnMonster(monsters, species, choice?.label);
   monsters.push(m);
   selectMonster(m, false);
-  appendLog(
+  const msg =
     lang === "ko"
       ? `추가: ${m.code} ${m.name.ko} · ${m.role.ko}`
-      : `Added: ${m.code} ${m.name.en} · ${m.role.en}`,
-  );
+      : `Added: ${m.code} ${m.name.en} · ${m.role.en}`;
+  appendLog(msg);
+  showToast(msg, true);
   rosterDirty = true;
+  renderProjects();
 });
 
 for (const drop of document.querySelectorAll<HTMLElement>(".team-drop")) {
@@ -377,14 +487,18 @@ for (const drop of document.querySelectorAll<HTMLElement>(".team-drop")) {
     const team = drop.dataset.team as TeamId;
     assignTeam(m, team, nowSec);
     if (selected?.id === m.id) fillInspect(m);
-    appendLog(
+    const msg =
       lang === "ko"
         ? `${m.code} → ${TEAM_META[team as Exclude<TeamId, "unassigned">].label.ko} 팀`
-        : `${m.code} → ${TEAM_META[team as Exclude<TeamId, "unassigned">].label.en} team`,
-    );
+        : `${m.code} → ${TEAM_META[team as Exclude<TeamId, "unassigned">].label.en} team`;
+    appendLog(msg);
+    showToast(msg, true);
     rosterDirty = true;
+    renderProjects();
   });
 }
+
+projectDetailClose.addEventListener("click", () => projectDetailDialog.close());
 
 optionsBtn.addEventListener("click", () => {
   renderOptionsRoles();
@@ -495,4 +609,5 @@ appendLog(
 );
 appendLog(formatSituation(makeCtx())[lang], "sit");
 renderRoster();
+renderProjects();
 requestAnimationFrame(tick);
